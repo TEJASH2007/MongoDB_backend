@@ -1,0 +1,324 @@
+Shell : Useful to interact with the mongoDB 
+
+mongosh : to start the mongoDB
+
+use college : to create & use a new data batabase called "college"
+
+ctrl k : to erase the terminal   // for windows it is ctrl l
+
+help : Gives the all commands related to mongodb
+
+quit : to exit the mongoDB
+mongoDB is internally running the js  so if we write 1 + 2 then it will give the 3
+
+when we insert the data on that time mongoDB create the dataBase
+db : show the name of the current database
+
+show dbs : To Watch the every exist databases
+
+BSON :  Binary JSON
+
+# issues with the json data
+1 : it is the text based :: {key : val}
+2 : space inefficient 
+
+BSON 
+#It gives so much datatypes
+// https://www.geeksforgeeks.org/javascript/difference-between-json-and-bson/    
+
+Mongo DB stores the data in the formate of the BSON But
+ when we are insert it We insert it as the JS 
+
+# Collection
+1 : Document : MongoDB stores the data in form of the documents(BSON docs)
+2 : Collection : MongoDB stores documents in collections
+in the database we have the collection instead of the tables
+In the docs we have the objects like the js 
+for eample  : 
+    {
+        name : 'Tejash',
+        age : 18
+    }
+
+
+# insert IN DB  :  https://www.mongodb.com/docs/manual/crud/
+
+1 : show collections
+2 : db.collection_name.insertOne();     // inserts the single document into the collection
+3 : db.collection_name.insertMany([ {} , {} , {} ]);
+when we insert the data creates the insertedId as the primary key 
+
+
+# find in DB : for specific queries
+
+1 : db.collection.find({key : value})     // it will returs the cursor of all the matched objects
+    ex : db.student.find( { marks : 100 } );
+
+2 : db.collection.findOne({key : value})   // it will return only first matched
+
+when  : we run like  db.student.find( {marks : 100} );
+[
+  {
+    _id: ObjectId('6ac56ac52aa45461356daab3'),
+    name: 'Krishna',
+    marks: 100
+  },
+  {
+    _id: ObjectId('6ac56ac52aa45461356daab4'),
+    name: 'Radha',
+    marks: 100
+  }
+]
+
+and when  : we run like db.student.findOne( {marks : 100} );
+{
+  _id: ObjectId('6ac56ac52aa45461356daab3'),
+  name: 'Krishna',
+  marks: 100
+}
+
+The main differece is that db.collection.find returns the cursor means return the reference
+where findOne  return the copy( actual document );
+
+
+
+# query Operators
+1 : find students where marks > 75
+ans : db.student.find( {marks : {$gt : 75}} )
+
+2 : find student who live in delhi or mumbai
+ans : db.student.find( {city : {$in : ["delhi" , "Mumbai"] } } );
+
+3 : find student who scored > 75 or live in delhi
+ans : db.student.find( {$or : [ {marks : { $gt : 75 } } , { city : 'delhi' } ]} );
+
+# update :
+
+1 : updateOne                   // updates atmost single document
+syntax : updateOne(<filter> , <update> , <options>)
+db.collection.updateOne( {name : "adam"} , {$set : {marks : 99}}  )
+
+2 : updateMany({city : "Delhi"} , {$set : {city : "New - dlehi"}})
+
+Nesting :
+ db.student.insertOne({
+    name : "Tejash" , 
+    performance : 
+                {
+                    marks : 99 
+                    , grade : "A"
+                }
+})
+db.student.find({"performance.marks" : 99});
+
+Delete IN DB 
+db.collection.deleteOne(<filter>);
+ex : db.collection.deleteOne({marks : {$lte : 90}});
+
+// To delete the every Row :
+db.collection.deleteMany({});   {} means no condition
+
+To drop the entire DataBase
+db.dropDatabase( db_name )
+
+
+##################### Mongoose ##################
+
+: Mongoose is the library which helps us to create the connection between the 
+Node.js javascript runtime and mongodb
+
+: It is the object data modelling(ODM) library
+
+it is one npm library
+
+We can do all the operations without using the mongooes on the mongo Shell
+
+Use : 1 => To create schema for the tables
+      2 => We can also pass the queries easily
+# to install the mongooes :=> npm install mongoose
+
+#source :=> https://mongoosejs.com/
+
+Schema : 
+    Schema defines the shape of the document within the collection
+    ex : userSchema = new mongoose.schema({
+                      name : String,
+                      email : String,
+                      age : Number,
+          })
+  
+Models :=> Model in Mongoose is a class with which we construct documents
+const User = mongoose.model("User" , userSchema)  ; {Collection_name , schema of the Collection}
+// remark : if we write in mongosh the show collections
+// then it will show " users " means mongosh  converts it to the smaller letters and plural form
+Mongoose's model is similar to the js classes
+
+// how to insert the data in the mongoose
+
+ex : step1 : create the object first
+            const user1 = new User({name : "Krishna" , email : "krishna@gmail.com" , age : "19"});
+      step2 : 
+
+mongoose automatically creates the _id
+
+// check model section of the api section
+
+Inserting Many
+
+ex : User.insertMany( [ {} , {} , {} ] );
+
+
+// During the insertion Mongoose using the operation Buffer
+mongoose uses the ### Operation Buffering ###
+Means :=> Mongoose lets you start using your models immediately , without 
+          waiting for mongoose to esatablish a connection to MongoDB
+
+Find :=> source model -> api
+
+model.find()
+Here model.find() method not returing the promise but returns the query 
+But we can use the .then() method with model.find()
+
+######   Here if we use  :    let user = await User.findOne( {} )    
+                                        then it wait until the result will present   
+                                        - we don't need to use the exec()   method 
+
+const Person = mongoose.model('Person', yourSchema);
+
+// find each person with a last name matching 'Ghost', selecting the `name` and `occupation` fields
+const person = await Person.findOne({ 'name.last': 'Ghost' }, 'name occupation');
+// Prints "Space Ghost is a talk show host".
+console.log('%s %s is a %s.', person.name.first, person.name.last, person.occupation);
+
+
+####     here we are using : let query =  User.findOne( {} )
+
+                                Here findOne will return the query object not the result 
+                                so we have to execute it 
+                            
+                            let person = await query.exec();
+
+
+//  in - short :  await returns the result , w/o await it returns the query object
+
+
+// find each person with a last name matching 'Ghost'
+const query = Person.findOne({ 'name.last': 'Ghost' });
+
+// selecting the `name` and `occupation` fields
+query.select('name occupation');
+
+// execute the query at a later time
+const person = await query.exec();
+// Prints "Space Ghost is a talk show host."
+console.log('%s %s is a %s.', person.name.first, person.name.last, person.occupation);
+
+model.findOne();
+
+User.updateOne({name : 'Tejash Shah'} , {$set : {name : "Madhav"}}).then();
+User.updateOne({name : 'Tejash Shah'} , {$set : {name : "Madhav"}})
+    .then(res => {
+        console.log(res);
+    })
+    .catch(err => {
+        console.log(err);
+    });
+
+User.updateMany({name : 'Tejash Shah'} , {$set : {name : "Madhav"}})
+    .then(res => {
+        console.log(res);
+    })
+    .catch(err => {
+        console.log(err);
+    });
+
+User.findOneAndUpdate({} , {} ,{new : true})     // filter new values
+User.findOneAndUpdate({} , {} , {new: false});  // bydefault new is false
+
+// 1. Returns a Query object (Database has NOT been queried yet)
+const query = User.findOneAndUpdate({ name: 'John' }, { age: 30 }); 
+
+// You can still chain options to the query object
+query.setOptions({ new: true }).select('name age'); 
+
+// 2. Triggers execution (Behaves like a Promise)
+const doc = await query; 
+
+# delete   :=> returns Query Object
+User.deleteOne({name  : "Tejash"})
+      .then(res => console.log(res));
+
+User.findOneAndDelete();
+User.findByIdAndDelete();
+
+#####   Schema  Validations  #####    Explore all the functions for the validation
+
+const bookSchema = mongoose.Schema({
+    title:{
+        type: String,
+        required: true,       // means Not Null
+    },
+    author:{
+        type: String,
+    },
+    price:{
+        type : Number,
+    },
+    category:{
+      type : String,
+      enum : ["fiction" , "nonFiction"],
+    },
+
+    genre: [String]
+});
+
+
+###### schema Validation with Update  #####
+
+The  rules which we have defined for the schema they are only validate the data
+during the insertion  , if we try to update with the some violated value 
+then there will no any error will occur
+
+set the value of the run validator to be true
+ex :=>  User.findOneAndUpdate({condition} , { new Values } , {runValidators : true});
+
+Source : validation in website
+
+To define the custom error
+const bookSchema = mongoose.Schema({
+    title:{
+        type: String,
+        required: true,       // means Not Null
+    },
+    author:{
+        type: String,
+    },
+    price:{
+        type : Number,
+        min : [1 , "Price is too low for the selling"]
+    },
+    category:{
+      type : String,
+      enum : ["fiction" , "nonFiction"],
+    },
+    genre: [String]
+});
+
+console.log(err.errors.price.property.message)
+
+
+######    How to connect the mongoDB with the expresss   ######
+
+
+# remember 
+
+while creating the new & route path
+the get  /chats/new        gives the button to add the some new chat
+and post /chats            Insert into the DB
+
+
+when someone Clicks on the button then go to the get route
+and if submit clicks then insert into db through the post request
+
+
+req.params : 
