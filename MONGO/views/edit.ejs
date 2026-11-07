@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=
+    , initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <!-- Remember always use /    before giving the route    /route -->
+    <form action="/chats/<%=chat._id%>?_method=PUT" method =  'POST' >
+        <p> <b> FROM : </b> <%= chat.from %></p>
+        <br>
+        <p> <b> TO : </b> <%= chat.to %></p>
+        <br>
+        <label for="new_msg"><b>New Message</b></label>
+        <br>
+        <textarea name="new_msg" id="new_msg" rows = '10'  cols = '50' placeholder="Edit your message">
+            <%=chat.msg%>
+        </textarea>
+        <button type = 'submit'>Update</button>
+    </form>
+
+</body>
+</html>

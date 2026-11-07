@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Chats</title>
+
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="title">
+        <h1>All Chats</h1>
+
+        <form action="/chats/new" method="GET">
+            <button type="submit">New Chat</button>
+        </form>
+    </div>
+
+    <% for (let chat of chats) { %>
+        <div class="chat">
+            <div class="from">
+                <strong>From:</strong> <%= chat.from %>
+            </div>
+
+            <div class="to">
+                <strong>To:</strong> <%= chat.to %>
+            </div>
+
+            <div class="message">
+                <strong>Message:</strong> <%= chat.msg %>
+            </div>
+            <form action="/chat/<%=chat._id%>/edit">
+                <button type = 'submit'> Edit </button>
+            </form>
+            <br>
+            <form action="/chat/<%=chat._id%>?_method=DELETE" method = "POST">
+                <button type = 'submit'>DELETE</button>
+            </form>
+            <div class="date">
+                <strong>Created:</strong> <%= chat.created_at.toString().slice(" ")[4] %>
+            </div>
+        </div>
+    <% } %>
+</body>
+</html>
+
+<!--  in index.js use the command
+        app.set("veiw engine" , "ejs");        
+-->
+<!-- 
+
+Create the Dynamic Template (views/index.ejs)
+
+In your template file, you write standard HTML, but you can inject data using specialized EJS tags:
+• <%= %> outputs the evaluated value into the HTML (escaped).
+• <% %> executes control flow operations like loops or conditionals without printing anything directly. -->
