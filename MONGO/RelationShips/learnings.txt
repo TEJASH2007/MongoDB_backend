@@ -1,0 +1,128 @@
+########     Read the 6 thumbs rule for the schema definition in MongoDb   #######
+
+Model Name : Order
+
+in the object the key is also known as the field name
+
+let Post = {
+    user : {
+        type : Schema.types.ObjectId;
+        ref : 'Person'                #  here Person is the reference model name
+    }
+}
+
+post.find({}).populate(user);         # in populate the field name means the key for which i want the 
+                                      #  actual value from the referenced collection
+
+
+######################     APPROACH 1 : ONE TO FEW      ######################
+const userSchema = new mongoose.Schema({
+        userName : String,
+        addresses : [
+            { location : String , city : String }      # this is another schema
+        ],
+});
+
+const User = mongoose.model("User" , userSchema);
+
+
+async function addUser(){
+    let user1 = new User({
+        userName : "Tejash",
+        addresses : [{location : "25 , prahaladNagar society" , city : "Nadiad"}]
+    })
+    user1.addresses.push({location : "26 , prahaladNagar society" , city : "Mumbai"});
+    let result = await user1.save();
+    console.log(result);
+}
+
+#  in above method the mongodb treate every address value as the separate document and create the 
+# _id for every address
+
+[
+  {
+    _id: ObjectId('6af14ac3805872ae6b7570d8'),      # _id
+    userName: 'Tejash',
+    addresses: [
+      {
+        location: '25 , prahaladNagar society',
+        city: 'Nadiad',
+        _id: ObjectId('6af14ac3805872ae6b7570d9')   #   _id
+      },
+      {
+        location: '26 , prahaladNagar society',
+        city: 'Mumbai',
+        _id: ObjectId('6af14ac3805872ae6b7570da')    #   _id
+      }
+    ],
+    __v: 0
+  }
+]
+
+
+#  if we don't want like above then add the _id : false for the address 
+
+const userSchema = new mongoose.Schema({
+        userName : String,
+        addresses : [
+            {   location : String ,
+                city : String , 
+                _id : false                      #  changed
+            }
+        ],
+});
+
+
+
+######################     APPROACH 3: ONE TO many      ######################
+Goal : Store the reference to the child document inside parent
+
+ex : 
+        {
+            _id : ObjectId("..."),
+            name : "Tejash Shah",
+            orders : [
+                ObjectId("..."),
+                ObjectId("...")
+            ],
+            __v : 0
+        }
+
+
+const orderSchema = new mongoose.Schema({
+    item : String,
+    price : Number
+});
+
+
+const customerSchema = new mongoose.Schema({
+    username : String,
+    orders : [
+        {
+            type: mongoose.Schema.Types.ObjectId,    # Note Down the type
+            ref : "Order"                            # Parent's   MODEL Name not the field name
+        }
+    ]
+});
+
+async function add(){
+     let item1 = await Order.findOne({item : "samosa"});
+
+     console.log(item1);
+
+     let c1 = new Customer({
+         username : "Tejash Shah",
+         orders : [item1]
+     });
+
+     let res = await Customer.insertOne(c1);
+     console.log(res);
+
+     let c1 = await  Customer.findOne({}).populate("orders");     
+     # here during the populate use field name not the model name 
+     # populate is the method which replaces the referenced objectId with the actual documents
+     # from the referenced collections 
+
+     console.log(c1);
+}
+
