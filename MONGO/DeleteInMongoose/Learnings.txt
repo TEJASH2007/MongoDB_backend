@@ -1,0 +1,18 @@
+There are two types of the middleWares : 
+   1 :  HTTP request middleWares  
+   2 : mongoose middleWares
+
+1 :  HTTP request middleWares  
+
+        Syntax : function fn(req , res , next){
+
+        }
+      
+2 : mongoose middleWares
+        
+        Syntax : function fn(){
+
+        }
+
+this.getquery()
+

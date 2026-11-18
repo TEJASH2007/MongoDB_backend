@@ -1,0 +1,81 @@
+In 
+-> mongoose.Schema.virtual(...), 
+
+the virtual is a computed property on a Mongoose schema.
+
+A virtual:
+
+does not get stored in MongoDB
+can have a getter and/or setter
+is useful for values you want to derive from existing fields
+
+userSchema.virtual('fullName').get(function () {
+  return `${this.firstName} ${this.lastName}`;
+});
+
+Here: 
+    userSchema.virtual('fullName').get(function () {
+    return `${this.firstName} ${this.lastName}`;
+    });
+
+fullName is the virtual name
+the function inside .get(...) computes its value
+when you access doc.fullName, Mongoose runs that getter
+
+# here doc is the Model
+
+Important behavior:
+
+    virtuals are not persisted
+    you cannot query by them like normal stored fields   # Remember
+
+#  information about the vitual properties using the plugins
+You need both because populate() has to know how to match documents across two collections.
+
+In a virtual populate:
+
+localField = the field on the document you are currently querying
+foreignField = the field on the other collection that should match it
+For example:
+
+userSchema.virtual('posts', {
+  ref: 'Post',
+  localField: '_id',
+  foreignField: 'author'
+});
+
+This means:
+
+take the current User document's _id
+find all Post documents where Post.author === User._id
+So if a user has _id: 123, Mongoose effectively does:
+
+Post.find({ author: 123 })
+
+Why both are necessary:
+
+localField tells Mongoose what value to start from
+foreignField tells Mongoose where to look in the related collection
+Without localField, Mongoose would not know which value from the current document to use. 
+Without foreignField, Mongoose would not know which field in the other collection to compare against.
+
+A simple mental model:
+
+localField = “my side”
+foreignField = “their side”
+Another example:
+
+postSchema.virtual('authorDoc', {
+  ref: 'User',
+  localField: 'author',
+  foreignField: '_id',
+  justOne: true
+});
+
+This means:
+
+take Post.author
+find the User whose _id matches it
+So Mongoose uses the pair to define the relationship dynamically, 
+even though the virtual itself is not stored in MongoDB.
+
